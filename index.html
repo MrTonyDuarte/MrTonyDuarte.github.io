@@ -1,0 +1,581 @@
+<!-- # vim: ft=html
+# The line above is a vim modeline - when editing with vim it is seen and sets filetype for syntax highlighting
+# show place on string - need to identify note (eg f# on A string)
+#   also need to visualize staff for that note
+# Need reverse too - staff to place on string
+# graphics with html canvas methods called from javascript
+# upper left corner is 0,0 and lower right is right 500, down 800
+# could even use touch on ipad!!
+-->
+<!DOCTYPE html> <html> <head> 
+<!-- The built in random function gives me the same sequences on page reload. The one below solves that problem. -->
+<script src="https://cdn.jsdelivr.net/gh/nastyox/Rando.js@master/code/plain-javascript/2.0.0/rando-min.js"></script>
+<style>
+  #mygrid {                               /* mygrid is the element referencing this layout */
+    display: grid;
+    grid-template-areas: 
+        "header header header"
+        "fingerboard note staff"
+        "fbConf noteConf staffConf";
+    grid-template-rows: 130px 70vh 60px;   /* 20vh is 20% of viewport height */
+    grid-template-columns: 1fr 5vw 1fr;   /* 5vw is 5% of viewport width */
+    grid-gap: .5vw;     
+    height: 100vh;
+    margin: 0;
+    }
+  #mygrid > div {        
+    /*  font-size: 5vw;  // just to have a default during development */
+    padding: .5em;
+    /*  background: gold;  // for debugging grid layout  */
+    text-align: center;
+  }
+
+  /* Assign each grid area to an element so element can be used to assign code sections */
+  #pageHeader {
+    grid-area: header;
+  }
+  #theFingerboard {
+    grid-area: fingerboard;
+  }
+  #theNote { 
+    grid-area: note;      
+  }
+  #theStaff { 
+    grid-area: staff; 
+  }
+  #fingerboardConfiguration { 
+    grid-area: fbConf; 
+  }
+  #noteConfiguration { 
+    grid-area: noteConf; 
+  }
+  #staffConfiguration { 
+    grid-area: staffConf; 
+  }
+</style>
+
+
+</head> 
+<body>
+<div id=mygrid>       <!-- contained elements(the divs) use the layout specified by mygrid above -->
+
+  <!-------------------------------------------------------------------------
+   -------------------------------------------------------------------------
+     Header Grid Section
+  -------------------------------------------------------------------------->
+  <div id="pageHeader">
+     <h4>Tony's Violin Practice App</h4>
+        <!-- Radio Buttons to allow configuring what is first shown during practice session  -->
+        <form>
+          <fieldset>
+            <legend>Please select your preferred practice method (ie what to prompt you with):</legend>
+            <div>
+              <!--       name is used to associate a group of radio buttons     -->
+              <input type="radio" id="m1" name="mode" value="fingerboard" /> <label for="m1">Fingerboard Note</label>
+              <input type="radio" id="m2" name="mode" value="clef" checked/> <label for="m2">Clef Location</label>
+              <input type="radio" id="m3" name="mode" value="note" /> <label for="m3">Note Name</label>
+              <button type="submit">Submit</button>
+            </div>
+          </fieldset>
+        </form>
+        <pre id="log"></pre>
+ 
+     <script>
+        promptWithThisFirst="clef";   // This is default input from radiobutton. One of fingerboard | clef | note
+        // Radio buttons for Practice Mode
+        const form = document.querySelector("form");
+        const log = document.querySelector("#log");
+        form.addEventListener( "submit",     // catch submit button change event rather than individual radio btn events
+          (event) => {
+            const data = new FormData(form);
+            let output = "";
+            for (const entry of data) {        // iterate through form data
+              //output = `${output}${entry[0]}=${entry[1]}\r`;
+              output = `${entry[1]}`;   // note | clef | fingerboard
+            }
+            promptWithThisFirst=output;   // set the global variable so that we prompt with fingerboard | clef | note
+            //log.innerText = output;    // I think output will have the "mode=value" string of selected radiobutton
+            event.preventDefault();    // stops default action associated with this event (propagation of event)
+          }, false,
+        );
+     </script>
+  </div>
+
+  <!-------------------------------------------------------------------------
+   ----------------------------------------------------------------------------
+                    Fingerboard Grid Section
+  -------------------------------------------------------------------------->
+  <div id="theFingerboard">
+     <!-- Create a Javascript canvas to display the fingerboard -->
+     <canvas id="fbCanvas" width="500" height="600" style="border:1px solid #000000;"> </canvas>
+
+     <script>
+     // draw fingerboard lines
+     function drawFingerboard() {
+       var c = document.getElementById("fbCanvas");
+       var ctx = c.getContext("2d");
+       ctx.moveTo(xNut=90, yNut=50); // nut at top of fingerboard
+       ctx.lineTo(xNutend=420, yNutend=50);
+       ctx.stroke();
+       ctx.moveTo(xE=100, yE=50); //<!-- first E string -->
+       ctx.lineTo(xEend=100, yEend=600);
+       ctx.stroke();
+       ctx.moveTo(200, 50);  //<!-- second A string -->
+       ctx.lineTo(200, 600);
+       ctx.stroke();
+       ctx.moveTo(300, 50);  // <!-- third D string -->
+       ctx.lineTo(300, 600);
+       ctx.stroke();
+       ctx.moveTo(400, 50);  // <!-- fourth G string -->
+       ctx.lineTo(400, 600);
+       ctx.stroke();
+     }
+
+     // draw the note names on the fingerboard . I should get all this from NotesArr and define my vars there too.
+     function drawAllFingerboardNotes() {
+       var c = document.getElementById("fbCanvas");
+       var ctx = c.getContext("2d");
+       ctx.font = "30px Arial";
+       // Write notes on E string
+       ctx.fillText("E", xEE=400, yEE=30); 
+       ctx.fillText("F#",xEFsharp=400, yEFsharp=150);
+       ctx.fillText("G#",xEGsharp=400, yEGsharp=250);
+       ctx.fillText("A", xEA=400, yEA=300);
+       ctx.fillText("B", xEB=400, yEB=400);
+       ctx.fillText("C", xEC=400, yEC=500);
+       ctx.fillText("D", xED=400, yED=550);
+       // Write notes on A string
+       ctx.fillText("A", xAA=300, yAA=30);
+       ctx.fillText("B", xAB=300, yAB=150);
+       ctx.fillText("C#",xACsharp=300, yACsharp=250);
+       ctx.fillText("D", xAD=300, yAD=300);
+       ctx.fillText("E", xAE=300, yAE=400);
+       // Write notes on D string
+       ctx.fillText("D", xDD=200, yDD=30); 
+       ctx.fillText("E", xDE=200, yDE=150);
+       ctx.fillText("F#", xDFsharp=200, yDFsharp=250);
+       ctx.fillText("G", xDG=200, yDG=300);
+       ctx.fillText("A", xDA=200, yDA=400);
+       // Write notes on G string
+       ctx.fillText("G", xGG=100, yGG=30); 
+       ctx.fillText("A", xGA=100, yGA=150);
+       ctx.fillText("B", xGB=100, yGB=250);
+       ctx.fillText("C", xGC=100, yGC=300);
+       ctx.fillText("D", xGD=100, yGD=400);
+     }
+
+     drawFingerboard();      // draw fingerboard lines
+     drawAllFingerboardNotes();  // right now I have to call this to assign those variables! Puts note name on fingerboard
+
+     // Create an array of notes assoc with violin string. Zero indexed. This is fingerboard offsets.
+     // need location to write and whether to skip during practice and optional speed change
+     // want higher freq for some -- not sure how will do that
+     let notesArr = [
+       ["E", "E",xEE,yEE],    // [ [string], [note] ]
+       ["E", "F#",xEFsharp,yEFsharp],
+       ["E", "G#",xEGsharp,yEGsharp],
+       ["E", "A",xEA,yEA],
+       ["E", "B",xEB,yEB],
+       ["E", "C",xEB,yEC],  
+       ["E", "D",xEB,yED], 
+       ["A", "A",xAA,yAA],
+       ["A", "B",xAB,yAB],
+       ["A", "C#",xACsharp,yACsharp],
+       ["A", "D",xAD,yAD],
+       ["A", "E",xAE,yAE],
+       ["D", "D",xDD,yDD],
+       ["D", "E",xDE,yDE],
+       ["D", "F#",xDFsharp,yDFsharp],
+       ["D", "G",xDG,yDG],
+       ["D", "A",xDA,yDA],
+       ["G", "G",xGG,yGG],
+       ["G", "A",xGA,yGA],
+       ["G", "B",xGB,yGB],
+       ["G", "C",xGC,yGC],
+       ["G", "D",xGD,yGD]
+       ];
+     //console.log(notesArr[0][0]); // 1
+     //theNote.innerText=notesArr[1]; 
+
+     // Draw fingerboard circles
+       function drawFingerboardCircles() {
+         var c = document.getElementById("fbCanvas");
+         var ctx = c.getContext("2d");
+         for(i=0; i<notesArr.length; i++) {
+           // Don't draw a circle at nut
+           switch (notesArr[i][0]) {  // this is the string name(EADG) being tested
+             case "E": if(notesArr[i][1]=="E") continue; 
+                         break;
+             case "A": if(notesArr[i][1]=="A") continue;
+                         break;
+             case "D": if(notesArr[i][1]=="D") continue;
+                         break;
+             case "G": if(notesArr[i][1]=="G") continue;
+                         break;
+           }
+           // Draw all the finger position circles
+           ctx.beginPath();
+           ctx.arc(notesArr[i][2], notesArr[i][3], 10, 0, 2 * Math.PI);   // (x, y, radius, sAngle, eAngle, opt:counterclockwise) 
+           ctx.stroke();  // draw circle perimeter
+         }
+       }
+
+     drawFingerboardCircles();
+
+     // This is called from my runLoop() to erase and redraw fingerboard
+     // I erase note by erasing entire fingerboard canvas and then redrawing everything.
+     function  eraseFingerboardCanvas() {
+       var c = document.getElementById("fbCanvas");
+       var ctx = c.getContext("2d");
+       ctx.clearRect(0, 0, 500, 600);    // clear the fingerboard
+       drawFingerboard();       // redraw the fingerbooard  
+       drawFingerboardCircles();
+     }
+
+     // This is called by my runLoop() when a note is selected. 
+     // Either to prompt with the note on fingerboard, or to show note after either clef or name prompt.
+     function drawFingerboardLocation(randomNum) {   
+       var c = document.getElementById("fbCanvas");
+       var ctx = c.getContext("2d");
+       ctx.clearRect(0, 0, 500, 600);         // clear the fingerboard, could just call eraseFingerboardCanvas() here
+       drawFingerboard();                     // redraw the fingerbooard lines
+       drawFingerboardCircles();              // redraw the fingerboard cirlces
+       // Draw the specified finger position
+       ctx.fillStyle = "#000000";  // specify a black fill
+       ctx.beginPath();
+       ctx.arc(notesArr[randomNum][2], notesArr[randomNum][3], 10, 0, 2 * Math.PI);   // (x, y, radius, sAngle, eAngle, opt:counterclockwise) 
+       ctx.stroke();  // draw circle perimeter
+       ctx.fill();   // fill the circle
+     }
+
+     /*
+     // code to clear a rectange in a canvas. Not used now, but maybe useful someday?
+		 function clearFingerboardRect () {  // clear a rectangular region of canvas
+			 var c = document.getElementById("fbCanvas");
+			 var ctx = c.getContext("2d");
+			 ctx.font = "30px Arial";
+			 //ctx.fillStyle = 'white';
+			 // top upper corner is -30 away. 
+			 //ctx.clearRect(100, 100-30, 25, 35); // font below pt, clears area above pt
+			 ctx.fillRect(100,100,2,2); // fill in the pixel at (10,10)
+																	// x less x to erase ,  y , x to erase,  y to erase
+		 }
+     clearFingerboardRect();  // clear a rectangular region of canvas
+     */
+     </script>
+  </div>
+
+  <!-------------------------------------------------------------------------
+  ---------------------------------------------------------------------------
+                            Note Grid Area
+  -------------------------------------------------------------------------->
+
+  <!-- I dynamically fill in the string and note name into HTML code below using javascript -->
+  <div id="theNote">
+     <span style="font-size: 48px;"></span>   <!-- Can also use for debug...set with theNote.innerText="C#"; -->
+                             <!-- $("#iframe1").contents().find("body").css('font-size','20px');  javascript to set font size -->
+  </div>
+
+  <script>  
+     // My runLoop() uses an update() function to call this function and display violin string and note name on screen
+     function drawNoteName(currentRand) {  
+		    		theNote.innerHTML = '<span style="font-size: 24px;">String:<br>'+staffNotesArr[currentRand][0]+'<br></span><span style="font-size:78px;">' + staffNotesArr[currentRand][1]+ '</span>';
+     }
+
+     // My runLoop() uses this to clear last note name displayed on screen.
+     function eraseNoteDisplay() {
+		    	theNote.innerHTML= '<span style="font-size: 24px;"><br><br></span><span style="font-size:78px;"></span>';
+     }
+  </script>
+
+  <!-------------------------------------------------------------------------
+    ---------------------------------------------------------------------
+                          Staff Grid Area
+   -------------------------------------------------------------------------->
+  <div id="theStaff">
+        <canvas id="staffCanvas" width="500" height="600" style="border:1px solid #000000;"> </canvas>
+
+        <script>
+        // draw staff
+	      function drawStaff() {
+	     	 var c = document.getElementById("staffCanvas");
+	     	 var ctx = c.getContext("2d");
+         ctx.font = "420px Ariel";
+         ctx.fillText('\u{1D11E}', 10, 380); // Show treble clef 
+
+	     	 ctx.moveTo(250, 50); //  C line above treble clef
+	     	 ctx.lineTo(350, 50);
+	     	 ctx.stroke();
+	     	 ctx.moveTo(250, 100); //  A line above treble clef
+	     	 ctx.lineTo(350, 100);
+	     	 ctx.stroke();
+
+	     	 ctx.moveTo(20, 150); // F line
+	     	 ctx.lineTo(500, 150);
+	     	 ctx.stroke();
+	     	 ctx.moveTo(20, 200); // D line
+	     	 ctx.lineTo(500, 200);
+	     	 ctx.stroke();
+	     	 ctx.moveTo(20, 250);  // B line
+	     	 ctx.lineTo(500, 250);
+	     	 ctx.stroke();
+	     	 ctx.moveTo(20, 300);  // G line
+	     	 ctx.lineTo(500, 300);
+	     	 ctx.stroke();
+	     	 ctx.moveTo(20, 350);  // E line
+	     	 ctx.lineTo(500, 350);
+	     	 ctx.stroke();
+
+	     	 ctx.moveTo(250, 400); //  C line below treble clef
+	     	 ctx.lineTo(350, 400);
+	     	 ctx.stroke();
+	     	 ctx.moveTo(250, 450); //  A line below treble clef
+	     	 ctx.lineTo(350, 450);
+	     	 ctx.stroke();
+         drawSharpSymbolsOnStaff();
+	      }
+
+        drawStaff();      // draw staff
+
+/*
+        // Not using this I think
+        let sharpSymbolArr = [
+          ["E", "F#",275,150],
+          ["E", "G#",275,125],
+          ["A", "C#",275,225],
+          ["D", "F#",275,325]
+        ];
+*/
+
+        function drawSharpSymbolsOnStaff() {
+          var c = document.getElementById("staffCanvas");
+          var ctx = c.getContext("2d");
+          ctx.font = "50px Arial";
+          // Write notes on E string
+          ctx.fillText("#", 120, 150+15);  // all seem to need to drop a bit lower to offset char baseline 
+          ctx.fillText("#",150, 125+15);
+          ctx.fillText("#",150, 225+15);
+          ctx.fillText("#",150, 325+15);
+        };
+
+        drawSharpSymbolsOnStaff();
+
+        // FIXME - this needs to change for staff not fingerboard
+        // Create an array of notes. Zero indexed.
+        // need location to write and whether to skip during practice and optional speed change
+        // want higher freq for some -- not sure how will do that
+        let staffNotesArr = [
+          ["E", "E",275,175],    // [ [string], [note] ]
+          ["E", "F#",275,150],
+          ["E", "G#",275,125],
+          ["E", "A",275,100],
+          ["E", "B",275,75],
+          ["E", "C",275,50],
+          ["E", "D",275,25],
+          ["A", "A",275,275],
+          ["A", "B",275,250],
+          ["A", "C#",275,225],
+          ["A", "D",275,200],
+          ["A", "E",275,175],
+          ["D", "D",275,375],
+          ["D", "E",275,350],
+          ["D", "F#",275,325],
+          ["D", "G",275,300],
+          ["D", "A",275,275],
+          ["G", "G",275,475],
+          ["G", "A",275,450],
+          ["G", "B",275,425],
+          ["G", "C",275,400],
+          ["G", "D",275,375]
+        ];
+
+
+
+       // Needs to use array of staff notes
+				function drawAllStaffNotes() {
+					var c = document.getElementById("staffCanvas");
+					var ctx = c.getContext("2d");
+					// Write notes on E string
+					ctx.font = "155px Arial";
+					ctx.fillText('\u{2669}',300, 175); // E
+					ctx.fillText('\u{2669}',300, 150); // F#
+					ctx.fillText('\u{2669}', 300, 125); // G
+					ctx.fillText('\u{2669}', 300, 100); // A
+					ctx.fillText('\u{2669}', 300, 75);   // B
+					ctx.fillText('\u{2669}', 300, 50);   // this is a C which isn't used right now.
+					ctx.fillText('\u{2669}', 300, 25);   // this is a D which isn't used right now.   25 off from 50
+					// Write notes on A string
+					ctx.fillText('\u{2669}', 300, 275);  // A
+					ctx.fillText('\u{2669}', 300, 250);  // B
+					ctx.fillText('\u{2669}', 300, 225);  // C#
+					ctx.fillText('\u{2669}', 300, 200);  // D
+					ctx.fillText('\u{2669}', 300, 175);  // E
+					// Write notes on D string
+					ctx.fillText('\u{2669}', 300, 375);   // D
+					ctx.fillText('\u{2669}', 300, 350);  // E
+					ctx.fillText('\u{2669}', 300, 325);  // F#
+					ctx.fillText('\u{2669}', 300, 300);  // G
+					ctx.fillText('\u{2669}', 300, 275);  // A
+					// Write notes on G string
+					ctx.fillText('\u{2669}', 300, 475); // G
+					ctx.fillText('\u{2669}', 300, 450); // A
+					ctx.fillText('\u{2669}', 300, 425); // B
+					ctx.fillText('\u{2669}', 300, 400); // C
+					ctx.fillText('\u{2669}', 300, 375); // D
+					ctx.font = "15px Arial";
+				}
+     //drawAllStaffNotes();
+
+        function eraseStaffCanvas() {
+					var c = document.getElementById("staffCanvas");
+					var ctx = c.getContext("2d");
+          ctx.clearRect(0, 0, 500, 600);    // clear the staff
+          drawStaff();                      // redraw staff
+        }
+
+        function drawStaffNote(randomNum) {
+					var c = document.getElementById("staffCanvas");
+					var ctx = c.getContext("2d");
+          // clear the staff
+          eraseStaffCanvas();
+          // draw current note on staff
+					ctx.font = "155px Arial";
+					ctx.fillText('\u{2669}',staffNotesArr[currentRand][2], staffNotesArr[currentRand][3]); 
+        }
+
+        </script>
+
+  </div>
+
+  <!-------------------------------------------------------------------------
+   ---------------------------------------------------------------------------
+                  Fingerboard Configuration Grid Area
+  -------------------------------------------------------------------------->
+
+  <div id="fingerboardConfiguration">
+     <div class="slidecontainer">
+         <p>Time Delay between notes (milliseconds): <span id="sliderOutput"></span></p>
+        <input type="range" min="500" max="8000" value="1500" class="slider" step="500" id="mySliderRange">  <!-- default value 1500 -->
+
+     </div>
+     <script>
+        var timeDelayFromSlider = 1500;  // use a 1 sec default (1500ms) On initial invocation nobody has touched slider so this var must be set here 
+        var slider = document.getElementById("mySliderRange");
+        var output = document.getElementById("sliderOutput");
+
+        slider.value = timeDelayFromSlider;   // do this so page reload updates slider - caches old value between reloads for some reason
+        output.innerHTML = slider.value; // Display the default slider value
+
+        // Update the current slider value (each time you drag the slider handle)
+        slider.oninput = function() {
+          output.innerHTML = this.value;
+          timeDelayFromSlider=this.value;
+         } 
+      </script>
+  </div>
+
+  <!-------------------------------------------------------------------------
+    -------------------------------------------------------------------------
+                Note Configuration Grid Area
+  -------------------------------------------------------------------------->
+
+  <div id="noteConfiguration"> </div>
+
+  <!-------------------------------------------------------------------------
+   ---------------------------------------------------------------------------
+                Staff Configuration Grid Area
+  -------------------------------------------------------------------------->
+
+  <div id="staffConfiguration"></div>
+
+  <!------------------------------------------------------------------------
+    ------------------------------------------------------------------------
+               Main Program Logic 
+  -------------------------------------------------------------------------->
+  </div>
+    <script>
+        currentRand=lastRand=null;
+        oldNote=newNote=null;
+        lastTimeDelay=currentTimeDelay=tmpTimeDelay=1500;    // assume start with 1 1/2 sec delay (the minimum so any setting will be higher)
+
+        // Gen random int between min and max inclusive
+				function getRndInt(min, max) {
+					return Math.floor(rando() * (max - min) ) + min;
+				}
+      
+        /*------------- Main Program Loop --------------------------------*/
+        // Use recurring timer to keep prompting with notes
+				function runLoop() {
+            // get a random number that is different from last random number
+		    		do {
+		    				currentRand = getRndInt(0,notesArr.length); 
+		    		} while (currentRand == lastRand);
+
+            // Erase all the dynamic UI - staff, note display, fingerboard
+            eraseFingerboardCanvas();
+            eraseStaffCanvas();
+            eraseNoteDisplay();
+
+            // test radio button and prompt using fingerboard | clef | note
+            switch(promptWithThisFirst) {  // This is input from radiobutton. 
+             case "clef": 
+                         drawStaffNote(currentRand);      // draw note on staff
+                         setTimeout(updateNoteAndFingerboard,currentTimeDelay,currentRand);    // need to cancel this timeout if delay gets smaller
+                         break;
+             case "fingerboard": 
+                         drawFingerboardLocation(currentRand);   // draw note location on fingerboard using filled circle
+                         setTimeout(updateNoteAndStaff,currentTimeDelay,currentRand);    // need to cancel this timeout if delay gets smaller
+                         break;
+             case "note": 
+                         drawNoteName(currentRand);
+                         setTimeout(updateFingerboardAndStaff,currentTimeDelay,currentRand);    // need to cancel this timeout if delay gets smaller
+                         break;
+             default:
+                theNote.innerHTML= theNote.innerHTML+ '<span style="font-size: 30px;"><br>DEF:'+promptWithThisFirst + ':END</span>';
+                break;
+            }
+
+		    		lastRand=currentRand;   // cache the random number so can make sure not immediately reused
+            // DEBUG theNote.innerHTML= theNote.innerHTML+ '<span style="font-size: 10px;"><br>'+currentTimeDelay+'<br></span><span style="font-size:10px;">' + timeDelayFromSlider + '</span>';
+            cachedTimeDelay=timeDelayFromSlider;   // cache a stable value since the slider value can change asynchronously.
+            // check to see if currentTimeDelay is same as the slider says it should be
+            if(currentTimeDelay!=cachedTimeDelay) {
+                  // slider changed, so outer loop may be too small for delay desired for 
+                  // if time got bigger, then
+                  //        should be OK to set outer loop to bigger number
+                  if (currentTimeDelay < cachedTimeDelay) {
+                    currentTimeDelay = cachedTimeDelay;   // the outer loop will be made longer, so inner callback should have time to complete
+                  }
+
+                  // if time got smaller, then
+                  //         need to wait for inner timer to trigger before starting outer loop
+                  //         so can set outer to larger one more time and skip inner timer once
+
+            } else {
+              currentTimeDelay=cachedTimeDelay;  // for now just make whatever the slider says
+            }
+            // want to add some time to slider value, but need to convert to numeric to make work.
+            tmp=Number(currentTimeDelay)+2500;    // this number tells me how long the "answer" will display. Not UI settable right now.
+		    		timerId = setTimeout(runLoop, tmp); 
+				}
+
+
+       //let timerId = setTimeout(runLoop, 500);
+       runLoop();
+
+       function updateNoteAndFingerboard(currentRand) {
+            drawNoteName(currentRand);
+            drawFingerboardLocation(currentRand);   // draw note location on fingerboard using filled circle
+       }
+       function updateNoteAndStaff(currentRand) {
+            drawNoteName(currentRand);
+            drawStaffNote(currentRand);      // draw note on staff
+       }
+       function updateFingerboardAndStaff(currentRand) {
+            drawStaffNote(currentRand);      // draw note on staff
+            drawFingerboardLocation(currentRand);   // draw note location on fingerboard using filled circle
+       }
+    </script>
+     <p>© Copyright 2024 by tony. All rights reserved.</p>
+</html>
+
