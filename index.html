@@ -17,16 +17,16 @@
         "header header header"
         "fingerboard note staff"
         "fbConf noteConf staffConf";
-    grid-template-rows: 130px 70vh 60px;   /* 20vh is 20% of viewport height */
-    grid-template-columns: 1fr 5vw 1fr;   /* 5vw is 5% of viewport width */
+    grid-template-rows: 250px 65vh 1px;   /* 20vh is 20% of viewport height  */
+    grid-template-columns: 1fr 5vw 1fr;   /* 5vw is 5% of viewport width  */
     grid-gap: .5vw;     
     height: 100vh;
     margin: 0;
     }
   #mygrid > div {        
-    /*  font-size: 5vw;  // just to have a default during development */
+    /*  font-size: 5vw;   just to have a default during development */
     padding: .5em;
-    /*  background: gold;  // for debugging grid layout  */
+    /*  background: gold;   for debugging grid layout  */
     text-align: center;
   }
 
@@ -68,11 +68,11 @@
         <!-- Radio Buttons to allow configuring what is first shown during practice session  -->
         <form>
           <fieldset>
-            <legend>Please select your preferred practice method (ie what to prompt you with):</legend>
+            <legend>Optionally select your preferred practice method (ie. what to prompt you with):</legend>
             <div>
               <!--       name is used to associate a group of radio buttons     -->
               <input type="radio" id="m1" name="mode" value="fingerboard" /> <label for="m1">Fingerboard Note</label>
-              <input type="radio" id="m2" name="mode" value="clef" checked/> <label for="m2">Clef Location</label>
+              <input type="radio" id="m2" name="mode" value="clef" checked/> <label for="m2">Staff Location</label>
               <input type="radio" id="m3" name="mode" value="note" /> <label for="m3">Note Name</label>
               <button type="submit">Submit</button>
             </div>
@@ -99,6 +99,25 @@
           }, false,
         );
      </script>
+     <div class="slidecontainer">
+         <p>Time Delay between notes (milliseconds): <span id="sliderOutput"></span></p>
+        <input type="range" min="500" max="8000" value="1500" class="slider" step="500" id="mySliderRange">  <!-- default value 1500 -->
+
+     </div>
+     <script>
+        var timeDelayFromSlider = 1500;  // use a 1 sec default (1500ms) On initial invocation nobody has touched slider so this var must be set here 
+        var slider = document.getElementById("mySliderRange");
+        var output = document.getElementById("sliderOutput");
+
+        slider.value = timeDelayFromSlider;   // do this so page reload updates slider - caches old value between reloads for some reason
+        output.innerHTML = slider.value; // Display the default slider value
+
+        // Update the current slider value (each time you drag the slider handle)
+        slider.oninput = function() {
+          output.innerHTML = this.value;
+          timeDelayFromSlider=this.value;
+         } 
+      </script>
   </div>
 
   <!-------------------------------------------------------------------------
@@ -356,28 +375,28 @@
         // need location to write and whether to skip during practice and optional speed change
         // want higher freq for some -- not sure how will do that
         let staffNotesArr = [
-          ["E", "E",275,177],    // [ [string], [note] ]
-          ["E", "F#",275,152],
-          ["E", "G#",275,127],
-          ["E", "A",275,102],
-          ["E", "B",275,77],
-          ["E", "C",275,52],
-          ["E", "D",275,27],
-          ["A", "A",275,277],
-          ["A", "B",275,252],
-          ["A", "C#",275,227],
-          ["A", "D",275,202],
-          ["A", "E",275,177],
-          ["D", "D",275,377],
-          ["D", "E",275,352],
-          ["D", "F#",275,327],
-          ["D", "G",275,302],
-          ["D", "A",275,277],
-          ["G", "G",275,477],
-          ["G", "A",275,452],
-          ["G", "B",275,427],
-          ["G", "C",275,402],
-          ["G", "D",275,377]
+          ["E", "E",275,179],    // [ [string], [note] ]
+          ["E", "F#",275,154],
+          ["E", "G#",275,129],
+          ["E", "A",275,104],
+          ["E", "B",275,79],
+          ["E", "C",275,54],
+          ["E", "D",275,29],
+          ["A", "A",275,279],
+          ["A", "B",275,254],
+          ["A", "C#",275,229],
+          ["A", "D",275,204],
+          ["A", "E",275,179],
+          ["D", "D",275,379],
+          ["D", "E",275,354],
+          ["D", "F#",275,329],
+          ["D", "G",275,304],
+          ["D", "A",275,279],
+          ["G", "G",275,479],
+          ["G", "A",275,454],
+          ["G", "B",275,429],
+          ["G", "C",275,404],
+          ["G", "D",275,379]
         ];
 
 
@@ -430,7 +449,7 @@
           // clear the staff
           eraseStaffCanvas();
           // draw current note on staff
-					ctx.font = "155px Arial";
+					ctx.font = "200px Arial";  // was 155, trying 165,, 185
 					ctx.fillText('\u{2669}',staffNotesArr[currentRand][2], staffNotesArr[currentRand][3]); 
         }
 
@@ -444,25 +463,6 @@
   -------------------------------------------------------------------------->
 
   <div id="fingerboardConfiguration">
-     <div class="slidecontainer">
-         <p>Time Delay between notes (milliseconds): <span id="sliderOutput"></span></p>
-        <input type="range" min="500" max="8000" value="1500" class="slider" step="500" id="mySliderRange">  <!-- default value 1500 -->
-
-     </div>
-     <script>
-        var timeDelayFromSlider = 1500;  // use a 1 sec default (1500ms) On initial invocation nobody has touched slider so this var must be set here 
-        var slider = document.getElementById("mySliderRange");
-        var output = document.getElementById("sliderOutput");
-
-        slider.value = timeDelayFromSlider;   // do this so page reload updates slider - caches old value between reloads for some reason
-        output.innerHTML = slider.value; // Display the default slider value
-
-        // Update the current slider value (each time you drag the slider handle)
-        slider.oninput = function() {
-          output.innerHTML = this.value;
-          timeDelayFromSlider=this.value;
-         } 
-      </script>
   </div>
 
   <!-------------------------------------------------------------------------
