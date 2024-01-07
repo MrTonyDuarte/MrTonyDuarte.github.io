@@ -6,6 +6,21 @@
 # graphics with html canvas methods called from javascript
 # upper left corner is 0,0 and lower right is right 500, down 800
 # could even use touch on ipad!!
+
+# TOFIX
+# A note on staff may apply to 2 first position locations - so need to display both on fingerboard and in notes text
+# Anticipate in that design that someday may show second or third position. Needs more complex display logic.
+#
+# POTENTIAL IMPROVEMENTS?
+# Display on mobile devices isn't quite right - offsets need tweaking.
+# Add checkboxes to allow only specific notes to be practiced
+# Add ability to practice between "non home finger" notes in first position
+# Add ability to practice 2nd and 3rd position notes
+# Will probably never modify the random note generator to read a midi file to prompt specific note sequence (with repeat of some subset).
+# Will probably never modify to audibly play the note
+# Will probably never modify to allow touch on fingerboard to allow memorization practice (with confirming prompt and retry on mistake?)
+# Will probably never modify to allow a mode where it shows all the fingerboard locations of one specific note? 
+# Will probably never modify to prompt with chords?
 -->
 <!DOCTYPE html> <html> <head> 
 <!-- The built in random function gives me the same sequences on page reload. The one below solves that problem. -->
@@ -69,12 +84,16 @@
         <form>
           <fieldset>
             <legend>Optionally select your preferred practice method (ie. what to prompt you with):</legend>
+
+
             <div>
               <!--       name is used to associate a group of radio buttons     -->
-              <input type="radio" id="m1" name="mode" value="fingerboard" /> <label for="m1">Fingerboard Note</label>
-              <input type="radio" id="m2" name="mode" value="clef" checked/> <label for="m2">Staff Location</label>
-              <input type="radio" id="m3" name="mode" value="note" /> <label for="m3">Note Name</label>
-              <button type="submit">Submit</button>
+              <div style="transform: scale(2);">
+                 <input type="radio" id="m1" name="mode" value="fingerboard" /> <label for="m1">Fingerboard Note</label>
+                 <input type="radio" id="m2" name="mode" value="clef" checked/> <label for="m2">Staff Location</label>
+                 <input type="radio" id="m3" name="mode" value="note" /> <label for="m3">Note Name</label>
+                 <button type="submit">Submit</button>
+              </div>
             </div>
           </fieldset>
         </form>
@@ -99,13 +118,12 @@
           }, false,
         );
      </script>
-     <div class="slidecontainer">
-         <p>Time Delay between notes (milliseconds): <span id="sliderOutput"></span></p>
-        <input type="range" min="500" max="8000" value="1500" class="slider" step="500" id="mySliderRange">  <!-- default value 1500 -->
-
+     <div class="slidecontainer" style="transform: scale(2);">
+         <p style="margin-top:40px;margin-bottom:auto;">Time Delay between notes (milliseconds): <span id="sliderOutput"></span></p>
+        <input type="range" min="500" max="8000" value="3000" class="slider" step="500" id="mySliderRange">  <!-- default value 3000 -->
      </div>
      <script>
-        var timeDelayFromSlider = 1500;  // use a 1 sec default (1500ms) On initial invocation nobody has touched slider so this var must be set here 
+        var timeDelayFromSlider = 3000;  // use a 3 sec default (3000ms) On initial invocation nobody has touched slider so this var must be set here 
         var slider = document.getElementById("mySliderRange");
         var output = document.getElementById("sliderOutput");
 
@@ -195,7 +213,7 @@
        ["E", "G#",xEGsharp,yEGsharp],
        ["E", "A",xEA,yEA],
        ["E", "B",xEB,yEB],
-       ["E", "C",xEB,yEC],  
+       ["E", "C#",xEB,yEC],  
        ["E", "D",xEB,yED], 
        ["A", "A",xAA,yAA],
        ["A", "B",xAB,yAB],
@@ -298,12 +316,12 @@
   <script>  
      // My runLoop() uses an update() function to call this function and display violin string and note name on screen
      function drawNoteName(currentRand) {  
-		    		theNote.innerHTML = '<span style="font-size: 24px;">String:<br>'+staffNotesArr[currentRand][0]+'<br></span><span style="font-size:78px;">' + staffNotesArr[currentRand][1]+ '</span>';
+       theNote.innerHTML = '<span style="font-size: 24px;">String:<br>'+staffNotesArr[currentRand][0]+'<br></span><span style="font-size:78px;">' + staffNotesArr[currentRand][1]+ '</span>';
      }
 
      // My runLoop() uses this to clear last note name displayed on screen.
      function eraseNoteDisplay() {
-		    	theNote.innerHTML= '<span style="font-size: 24px;"><br><br></span><span style="font-size:78px;"></span>';
+        theNote.innerHTML= '<span style="font-size: 24px;"><br><br></span><span style="font-size:78px;"></span>';
      }
   </script>
 
@@ -316,43 +334,43 @@
 
         <script>
         // draw staff
-	      function drawStaff() {
-	     	 var c = document.getElementById("staffCanvas");
-	     	 var ctx = c.getContext("2d");
-         ctx.font = "420px Ariel";
-         ctx.fillText('\u{1D11E}', 10, 380); // Show treble clef 
+        function drawStaff() {
+          var c = document.getElementById("staffCanvas");
+          var ctx = c.getContext("2d");
+          ctx.font = "420px Ariel";
+          ctx.fillText('\u{1D11E}', 10, 380); // Show treble clef 
 
-	     	 ctx.moveTo(250, 50); //  C line above treble clef
-	     	 ctx.lineTo(350, 50);
-	     	 ctx.stroke();
-	     	 ctx.moveTo(250, 100); //  A line above treble clef
-	     	 ctx.lineTo(350, 100);
-	     	 ctx.stroke();
+          ctx.moveTo(250, 50); //  C line above treble clef
+          ctx.lineTo(350, 50);
+          ctx.stroke();
+          ctx.moveTo(250, 100); //  A line above treble clef
+          ctx.lineTo(350, 100);
+          ctx.stroke();
 
-	     	 ctx.moveTo(20, 150); // F line
-	     	 ctx.lineTo(500, 150);
-	     	 ctx.stroke();
-	     	 ctx.moveTo(20, 200); // D line
-	     	 ctx.lineTo(500, 200);
-	     	 ctx.stroke();
-	     	 ctx.moveTo(20, 250);  // B line
-	     	 ctx.lineTo(500, 250);
-	     	 ctx.stroke();
-	     	 ctx.moveTo(20, 300);  // G line
-	     	 ctx.lineTo(500, 300);
-	     	 ctx.stroke();
-	     	 ctx.moveTo(20, 350);  // E line
-	     	 ctx.lineTo(500, 350);
-	     	 ctx.stroke();
+          ctx.moveTo(20, 150); // F line
+          ctx.lineTo(500, 150);
+          ctx.stroke();
+          ctx.moveTo(20, 200); // D line
+          ctx.lineTo(500, 200);
+          ctx.stroke();
+          ctx.moveTo(20, 250);  // B line
+          ctx.lineTo(500, 250);
+          ctx.stroke();
+          ctx.moveTo(20, 300);  // G line
+          ctx.lineTo(500, 300);
+          ctx.stroke();
+          ctx.moveTo(20, 350);  // E line
+          ctx.lineTo(500, 350);
+          ctx.stroke();
 
-	     	 ctx.moveTo(250, 400); //  C line below treble clef
-	     	 ctx.lineTo(350, 400);
-	     	 ctx.stroke();
-	     	 ctx.moveTo(250, 450); //  A line below treble clef
-	     	 ctx.lineTo(350, 450);
-	     	 ctx.stroke();
-         drawSharpSymbolsOnStaff();
-	      }
+          ctx.moveTo(250, 400); //  C line below treble clef
+          ctx.lineTo(350, 400);
+          ctx.stroke();
+          ctx.moveTo(250, 450); //  A line below treble clef
+          ctx.lineTo(350, 450);
+          ctx.stroke();
+          drawSharpSymbolsOnStaff();
+        }
 
         drawStaff();      // draw staff
 
@@ -380,7 +398,7 @@
           ["E", "G#",275,129],
           ["E", "A",275,104],
           ["E", "B",275,79],
-          ["E", "C",275,54],
+          ["E", "C#",275,54],
           ["E", "D",275,29],
           ["A", "A",275,279],
           ["A", "B",275,254],
@@ -402,55 +420,55 @@
 
 
        // Needs to use array of staff notes
-				function drawAllStaffNotes() {
-					var c = document.getElementById("staffCanvas");
-					var ctx = c.getContext("2d");
-					// Write notes on E string
-					ctx.font = "155px Arial";
-					ctx.fillText('\u{2669}',300, 175); // E
-					ctx.fillText('\u{2669}',300, 150); // F#
-					ctx.fillText('\u{2669}', 300, 125); // G
-					ctx.fillText('\u{2669}', 300, 100); // A
-					ctx.fillText('\u{2669}', 300, 75);   // B
-					ctx.fillText('\u{2669}', 300, 50);   // this is a C which isn't used right now.
-					ctx.fillText('\u{2669}', 300, 25);   // this is a D which isn't used right now.   25 off from 50
-					// Write notes on A string
-					ctx.fillText('\u{2669}', 300, 275);  // A
-					ctx.fillText('\u{2669}', 300, 250);  // B
-					ctx.fillText('\u{2669}', 300, 225);  // C#
-					ctx.fillText('\u{2669}', 300, 200);  // D
-					ctx.fillText('\u{2669}', 300, 175);  // E
-					// Write notes on D string
-					ctx.fillText('\u{2669}', 300, 375);   // D
-					ctx.fillText('\u{2669}', 300, 350);  // E
-					ctx.fillText('\u{2669}', 300, 325);  // F#
-					ctx.fillText('\u{2669}', 300, 300);  // G
-					ctx.fillText('\u{2669}', 300, 275);  // A
-					// Write notes on G string
-					ctx.fillText('\u{2669}', 300, 475); // G
-					ctx.fillText('\u{2669}', 300, 450); // A
-					ctx.fillText('\u{2669}', 300, 425); // B
-					ctx.fillText('\u{2669}', 300, 400); // C
-					ctx.fillText('\u{2669}', 300, 375); // D
-					ctx.font = "15px Arial";
-				}
-     //drawAllStaffNotes();
-
-        function eraseStaffCanvas() {
-					var c = document.getElementById("staffCanvas");
-					var ctx = c.getContext("2d");
-          ctx.clearRect(0, 0, 500, 600);    // clear the staff
-          drawStaff();                      // redraw staff
+        function drawAllStaffNotes() {
+          var c = document.getElementById("staffCanvas");
+          var ctx = c.getContext("2d");
+          // Write notes on E string
+          ctx.font = "155px Arial";
+          ctx.fillText('\u{2669}',300, 175); // E
+          ctx.fillText('\u{2669}',300, 150); // F#
+          ctx.fillText('\u{2669}', 300, 125); // G
+          ctx.fillText('\u{2669}', 300, 100); // A
+          ctx.fillText('\u{2669}', 300, 75);   // B
+          ctx.fillText('\u{2669}', 300, 50);   // this is a C which isn't used right now.
+          ctx.fillText('\u{2669}', 300, 25);   // this is a D which isn't used right now.   25 off from 50
+                                               // Write notes on A string
+          ctx.fillText('\u{2669}', 300, 275);  // A
+          ctx.fillText('\u{2669}', 300, 250);  // B
+          ctx.fillText('\u{2669}', 300, 225);  // C#
+          ctx.fillText('\u{2669}', 300, 200);  // D
+          ctx.fillText('\u{2669}', 300, 175);  // E
+                                               // Write notes on D string
+          ctx.fillText('\u{2669}', 300, 375);   // D
+          ctx.fillText('\u{2669}', 300, 350);  // E
+          ctx.fillText('\u{2669}', 300, 325);  // F#
+          ctx.fillText('\u{2669}', 300, 300);  // G
+          ctx.fillText('\u{2669}', 300, 275);  // A
+                                               // Write notes on G string
+          ctx.fillText('\u{2669}', 300, 475); // G
+          ctx.fillText('\u{2669}', 300, 450); // A
+          ctx.fillText('\u{2669}', 300, 425); // B
+          ctx.fillText('\u{2669}', 300, 400); // C
+          ctx.fillText('\u{2669}', 300, 375); // D
+          ctx.font = "15px Arial";
         }
+       //drawAllStaffNotes();
+
+         function eraseStaffCanvas() {
+           var c = document.getElementById("staffCanvas");
+           var ctx = c.getContext("2d");
+           ctx.clearRect(0, 0, 500, 600);    // clear the staff
+           drawStaff();                      // redraw staff
+         }
 
         function drawStaffNote(randomNum) {
-					var c = document.getElementById("staffCanvas");
-					var ctx = c.getContext("2d");
+          var c = document.getElementById("staffCanvas");
+          var ctx = c.getContext("2d");
           // clear the staff
           eraseStaffCanvas();
           // draw current note on staff
-					ctx.font = "200px Arial";  // was 155, trying 165,, 185
-					ctx.fillText('\u{2669}',staffNotesArr[currentRand][2], staffNotesArr[currentRand][3]); 
+          ctx.font = "200px Arial";  // was 155, trying 165,, 185
+          ctx.fillText('\u{2669}',staffNotesArr[currentRand][2], staffNotesArr[currentRand][3]); 
         }
 
         </script>
@@ -487,72 +505,68 @@
     <script>
         currentRand=lastRand=null;
         oldNote=newNote=null;
-        lastTimeDelay=currentTimeDelay=tmpTimeDelay=1500;    // assume start with 1 1/2 sec delay (the minimum so any setting will be higher)
+        lastTimeDelay=currentTimeDelay=tmpTimeDelay=3000;    // assume start with 3 sec delay 
 
         // Gen random int between min and max inclusive
-				function getRndInt(min, max) {
-					return Math.floor(rando() * (max - min) ) + min;
-				}
+        function getRndInt(min, max) {
+          return Math.floor(rando() * (max - min) ) + min;
+        }
       
         /*------------- Main Program Loop --------------------------------*/
         // Use recurring timer to keep prompting with notes
-				function runLoop() {
-            // get a random number that is different from last random number
-		    		do {
-		    				currentRand = getRndInt(0,notesArr.length); 
-		    		} while (currentRand == lastRand);
-
-            // Erase all the dynamic UI - staff, note display, fingerboard
-            eraseFingerboardCanvas();
-            eraseStaffCanvas();
-            eraseNoteDisplay();
-
-            // test radio button and prompt using fingerboard | clef | note
-            switch(promptWithThisFirst) {  // This is input from radiobutton. 
-             case "clef": 
-                         drawStaffNote(currentRand);      // draw note on staff
-                         setTimeout(updateNoteAndFingerboard,currentTimeDelay,currentRand);    // need to cancel this timeout if delay gets smaller
-                         break;
-             case "fingerboard": 
-                         drawFingerboardLocation(currentRand);   // draw note location on fingerboard using filled circle
-                         setTimeout(updateNoteAndStaff,currentTimeDelay,currentRand);    // need to cancel this timeout if delay gets smaller
-                         break;
-             case "note": 
-                         drawNoteName(currentRand);
-                         setTimeout(updateFingerboardAndStaff,currentTimeDelay,currentRand);    // need to cancel this timeout if delay gets smaller
-                         break;
-             default:
-                theNote.innerHTML= theNote.innerHTML+ '<span style="font-size: 30px;"><br>DEF:'+promptWithThisFirst + ':END</span>';
-                break;
+        function runLoop() {
+          // get a random number that is different from last random number
+          do {
+            currentRand = getRndInt(0,notesArr.length); 
+          } while (currentRand == lastRand);
+        
+          // Erase all the dynamic UI - staff, note display, fingerboard
+          eraseFingerboardCanvas();
+          eraseStaffCanvas();
+          eraseNoteDisplay();
+        
+          // test radio button and prompt using fingerboard | clef | note
+          switch(promptWithThisFirst) {  // This is input from radiobutton. 
+            case "clef": 
+              drawStaffNote(currentRand);      // draw note on staff
+              setTimeout(updateNoteAndFingerboard,currentTimeDelay,currentRand);    // need to cancel this timeout if delay gets smaller
+              break;
+            case "fingerboard": 
+              drawFingerboardLocation(currentRand);   // draw note location on fingerboard using filled circle
+              setTimeout(updateNoteAndStaff,currentTimeDelay,currentRand);    // need to cancel this timeout if delay gets smaller
+              break;
+            case "note": 
+              drawNoteName(currentRand);
+              setTimeout(updateFingerboardAndStaff,currentTimeDelay,currentRand);    // need to cancel this timeout if delay gets smaller
+              break;
+            default:
+              theNote.innerHTML= theNote.innerHTML+ '<span style="font-size: 30px;"><br>DEF:'+promptWithThisFirst + ':END</span>';
+              break;
+          }
+        
+          lastRand=currentRand;   // cache the random number so can make sure not immediately reused
+          // DEBUG theNote.innerHTML= theNote.innerHTML+ '<span style="font-size: 10px;"><br>'+currentTimeDelay+'<br></span><span style="font-size:10px;">' + timeDelayFromSlider + '</span>';
+          cachedTimeDelay=timeDelayFromSlider;   // cache a stable value since the slider value can change asynchronously.
+                                                 // check to see if currentTimeDelay is same as the slider says it should be
+          if(currentTimeDelay!=cachedTimeDelay) {   // this has become a no-op. Thought I needed to worry more about async timers
+            // slider changed, so outer loop may be too small for delay desired for ...?
+            // if time got bigger, then
+            //        should be OK to set outer loop to bigger number
+            if (currentTimeDelay < cachedTimeDelay) {
+              currentTimeDelay = cachedTimeDelay;   // the outer loop will be made longer, so inner callback should have time to complete
             }
+            // if time got smaller, then do I need to...
+            //         need to wait for inner timer to trigger before starting outer loop
+            //         so can set outer to larger one more time and skip inner timer once
+          } else {
+            currentTimeDelay=cachedTimeDelay;  // for now just make whatever the slider says
+          }
+          // want to add some time to slider value, but must convert to numeric otherwise fails to convert properly.
+          tmp=Number(currentTimeDelay)+2500;    // this number tells me how long the "answer" will display. Not UI settable right now.
+          timerId = setTimeout(runLoop, tmp); 
+        }
 
-		    		lastRand=currentRand;   // cache the random number so can make sure not immediately reused
-            // DEBUG theNote.innerHTML= theNote.innerHTML+ '<span style="font-size: 10px;"><br>'+currentTimeDelay+'<br></span><span style="font-size:10px;">' + timeDelayFromSlider + '</span>';
-            cachedTimeDelay=timeDelayFromSlider;   // cache a stable value since the slider value can change asynchronously.
-            // check to see if currentTimeDelay is same as the slider says it should be
-            if(currentTimeDelay!=cachedTimeDelay) {
-                  // slider changed, so outer loop may be too small for delay desired for 
-                  // if time got bigger, then
-                  //        should be OK to set outer loop to bigger number
-                  if (currentTimeDelay < cachedTimeDelay) {
-                    currentTimeDelay = cachedTimeDelay;   // the outer loop will be made longer, so inner callback should have time to complete
-                  }
-
-                  // if time got smaller, then
-                  //         need to wait for inner timer to trigger before starting outer loop
-                  //         so can set outer to larger one more time and skip inner timer once
-
-            } else {
-              currentTimeDelay=cachedTimeDelay;  // for now just make whatever the slider says
-            }
-            // want to add some time to slider value, but need to convert to numeric to make work.
-            tmp=Number(currentTimeDelay)+2500;    // this number tells me how long the "answer" will display. Not UI settable right now.
-		    		timerId = setTimeout(runLoop, tmp); 
-				}
-
-
-       //let timerId = setTimeout(runLoop, 500);
-       runLoop();
+       runLoop();  // call my runLoop() where it will just keep triggering timers to call itself.
 
        function updateNoteAndFingerboard(currentRand) {
             drawNoteName(currentRand);
